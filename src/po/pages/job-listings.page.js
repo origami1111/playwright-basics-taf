@@ -1,5 +1,5 @@
 const BasePage = require('./base.page');
-const SearchResultComponent = require('../components/search-result.component');
+const { SearchResultComponent } = require('../components');
 
 class JobListingsPage extends BasePage {
     constructor(page) {

@@ -1,18 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-const MainPage = require('../po/pages/main.page');
-const CareersPage = require('../po/pages/careers.page');
-const JobListingsPage = require('../po/pages/job-listings.page');
-const JobPage = require('../po/pages/job.page');
-const SearchPage = require('../po/pages/search.page');
-const AboutPage = require('../po/pages/about.page');
-const InsightsPage = require('../po/pages/insights.page');
-const EBookPage = require('../po/pages/ebook.page');
+const { pages } = require('../po'); 
 
 test.describe('EPAM UI tests', () => {
   test.beforeEach(async ({ page }) => {
-    const mainPage = new MainPage(page);
-    await mainPage.open(page);
+    await pages(page, 'main').open();
   });
 
   test('Has correct title', async ({ page }) => {
@@ -20,29 +12,24 @@ test.describe('EPAM UI tests', () => {
   });
 
   test('User can search for a position based on criteria', async ({ page }) => {
-    const mainPage = new MainPage(page);
-    const careersPage = new CareersPage(page);
-    const jobListingsPage = new JobListingsPage(page);
-    const jobPage = new JobPage(page);
-
     // Find a link “Carriers” and click on it
-    await mainPage.header.humburgerMenuButton.click();
-    await mainPage.header.hamburger.item('careers').first().click();
+    await pages(page, 'main').header.humburgerMenuButton.click();
+    await pages(page, 'main').header.hamburger.item('careers').first().click();
     await expect(page).toHaveURL(/.*careers/);
 
     // Write the name of any programming language in the field “Keywords” (should be taken from test parameter)
-    await careersPage.keywordField.fill('Java');
+    await pages(page, 'careers').keywordField.fill('Java');
     // Select “All Locations” in the “Location” field (should be taken from the test parameter)
-    await careersPage.locationDropdown.click();
-    await careersPage.location('All Locations').click();
+    await pages(page, 'careers').locationDropdown.click();
+    await pages(page, 'careers').location('All Locations').click();
     // Select the option “Remote”
-    await careersPage.remoteCheckbox.click();
+    await pages(page, 'careers').remoteCheckbox.click();
     // Click on the button “Find”
-    await careersPage.findButton.click();
+    await pages(page, 'careers').findButton.click();
     await expect(page).toHaveURL(/.*careers\/job-listings/);
 
     // Find the latest element in the list of results
-    const lastItemFromTheListOfResults = jobListingsPage.searchResultComponent.viewAndApplyButton.last();
+    const lastItemFromTheListOfResults = pages(page, 'jobListings').searchResultComponent.viewAndApplyButton.last();
     await lastItemFromTheListOfResults.scrollIntoViewIfNeeded();
 
     // Click on the button “View and apply”
@@ -50,7 +37,7 @@ test.describe('EPAM UI tests', () => {
     await expect(page).toHaveURL(/.*careers\/job-listings\/job/);
 
     // Validate that the programming language mentioned in the step above is on a page
-    await expect(jobPage.jobTitle).toContainText('Java');
+    await expect(pages(page, 'job').jobTitle).toContainText('Java');
   });
 
   [
@@ -59,21 +46,18 @@ test.describe('EPAM UI tests', () => {
     { searchString: 'automation' }
   ].forEach(({ searchString }) => { 
       test(`Global search works as expected with ${searchString}`, async ({ page }) => {
-      const mainPage = new MainPage(page);
-      const searchPage = new SearchPage(page);
-
       // Find a magnifier icon and click on it
-      await mainPage.header.magnifierIcon.click();
+      await pages(page, 'main').header.magnifierIcon.click();
 
       // Find a search string and put there “BLOCKCHAIN”/”Cloud”/”Automation” (use as a parameter for a test)
-      await mainPage.header.searchComponent.searchField.fill(searchString);
+      await pages(page, 'main').header.searchComponent.searchField.fill(searchString);
 
       // Click “Find” button
-      await mainPage.header.searchComponent.findButton.click();
+      await pages(page, 'main').header.searchComponent.findButton.click();
       await expect(page).toHaveURL(/.*search/);
 
       // Validate that all links in a list contain the word “BLOCKCHAIN”/”Cloud”/”Automation” in the text.
-      const searchResults = searchPage.searchResultItems;
+      const searchResults = pages(page, 'search').searchResultItems;
       // Wait for at least one search result to appear
       await expect(searchResults.first()).toBeVisible();
 
@@ -83,19 +67,16 @@ test.describe('EPAM UI tests', () => {
   });
   
   test('Validate file download function works as expected', async ({ page }) => {
-    const mainPage = new MainPage(page);
-    const aboutPage = new AboutPage(page);
-
     // Select “About” from the top menu.
-    await mainPage.header.humburgerMenuButton.click();
-    await mainPage.header.hamburger.item('about').first().click();
+    await pages(page, 'main').header.humburgerMenuButton.click();
+    await pages(page, 'main').header.hamburger.item('about').first().click();
     await expect(page).toHaveURL(/.*about/);
 
     // Scroll down to the “EPAM at a Glance” section.
-    await aboutPage.downloadButton.scrollIntoViewIfNeeded();
+    await pages(page, 'about').downloadButton.scrollIntoViewIfNeeded();
 
     // Click on the “Download” button.
-    await aboutPage.downloadButton.click();
+    await pages(page, 'about').downloadButton.click();
 
     // Wait till the file is downloaded.
     const downloadPromise = page.waitForEvent('download');
@@ -108,28 +89,24 @@ test.describe('EPAM UI tests', () => {
   });
 
   test('Title of the article matches with title in the carousel', async ({ page }) => {
-    const mainPage = new MainPage(page);
-    const insightsPage = new InsightsPage(page);
-    const ebookPage = new EBookPage(page);
-
     // Select “Insights” from the top menu.
-    await mainPage.header.humburgerMenuButton.click();
-    await mainPage.header.hamburger.item('insights').first().click();
+    await pages(page, 'main').header.humburgerMenuButton.click();
+    await pages(page, 'main').header.hamburger.item('insights').first().click();
     await expect(page).toHaveURL(/.*insights/);
 
     // Swipe a carousel twice.
-    const carousel = insightsPage.carousel.rightArrow.first();
+    const carousel = pages(page, 'insights').carousel.rightArrow.first();
     await carousel.click({delay: 1000, clickCount: 2});
 
     // Note the name of the article.
-    const carouselArticle = await insightsPage.carousel.carouselArticle.first().textContent();
+    const carouselArticle = await pages(page, 'insights').carousel.carouselArticle.first().textContent();
 
     // Click on the “Read More” button.
-    await insightsPage.carousel.readMoreButton.nth(5).click();
+    await pages(page, 'insights').carousel.readMoreButton.nth(5).click();
     await expect(page).toHaveURL(/.*insights\/ebook/);
 
     // Validate that the name of the article matches with the noted above.
-    const articleTitle = await ebookPage.articleTitle.nth(4).textContent();
+    const articleTitle = await pages(page, 'ebook').articleTitle.nth(4).textContent();
     expect(carouselArticle).toContain(articleTitle);
   });
 });

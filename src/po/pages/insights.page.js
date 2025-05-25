@@ -1,5 +1,5 @@
 const BasePage = require('./base.page');
-const CarouselComponent = require('../components/carousel.component');
+const { CarouselComponent } = require('../components');
 
 class InsightsPage extends BasePage {
     constructor(page) {
