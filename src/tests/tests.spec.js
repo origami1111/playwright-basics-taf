@@ -1,10 +1,14 @@
 import { test, expect } from '@playwright/test';
 
-const { pages } = require('../po'); 
+const { pages } = require('../po');
 
 test.describe('EPAM UI tests', () => {
   test.beforeEach(async ({ page }) => {
     await pages(page, 'main').open();
+  });
+
+  test.afterEach(async ({ page }) => {
+    await page.close();
   });
 
   test('Has correct title', async ({ page }) => {

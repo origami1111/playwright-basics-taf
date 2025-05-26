@@ -23,7 +23,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: 4,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -32,17 +32,19 @@ export default defineConfig({
     baseURL: 'https://www.epam.com',
     
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
 
     storageState: 'state.json',
+
+    video: 'retain-on-failure',
+    screenshot: {
+      mode: 'only-on-failure',
+      fullPage: true,
+    },
   },
 
   /* Configure projects for major browsers */
   projects: [
-    {
-      name: 'Desktop Safari',
-      use: { ...devices['Desktop Safari'] },
-    },
     {
       name: 'Google Chrome',
       use: { ...devices['Desktop Chrome'], channel: 'chrome' },
