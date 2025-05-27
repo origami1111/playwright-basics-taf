@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 const { pages } = require('../po');
+const path = require('path');
+const os = require('os');
 
 test.describe('EPAM UI tests', () => {
   test.beforeEach(async ({ page }) => {
@@ -88,7 +90,8 @@ test.describe('EPAM UI tests', () => {
     // Validate that file “EPAM_Systems_Company_Overview.pdf” downloaded (use the name of the file as a parameter)
     const download = await downloadPromise;
     const fileName = download.suggestedFilename();
-    await download.saveAs('C:\\Users\\Viacheslav_Ostrovsky\\Downloads\\' + fileName);
+    const downloadsPath = path.join(os.homedir(), 'Downloads', fileName);
+    await download.saveAs(downloadsPath);
     expect(fileName).toBe('EPAM_Systems_Company_Overview.pdf');
   });
 
